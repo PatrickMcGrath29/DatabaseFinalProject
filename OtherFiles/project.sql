@@ -1,18 +1,19 @@
-DROP DATABASE IF EXISTS university;
-CREATE DATABASE university;
-USE university;
+DROP DATABASE IF EXISTS UniversityTracker;
+CREATE DATABASE UniversityTracker;
+USE UniversityTracker;
 
 CREATE TABLE colleges
 (
-	college_name       VARCHAR(30)    PRIMARY KEY
+	college_name       VARCHAR(60)    PRIMARY KEY
 );
 
 CREATE TABLE students 
 (
 	student_id         VARCHAR(30)    PRIMARY KEY	UNIQUE,
+    student_password   VARCHAR(60)	  NOT NULL, 
 	first_name 		   VARCHAR(30)    NOT NULL, 
 	last_name 		   VARCHAR(30)    NOT NULL,
-	college_name       VARCHAR(30)    NOT NULL,
+	college_name       VARCHAR(60)    NOT NULL,
 	CONSTRAINT college_name_fk
 		FOREIGN KEY (college_name)
 		REFERENCES colleges (college_name)
@@ -39,7 +40,7 @@ CREATE table groups
 (
 	group_name			VARCHAR(50) NOT NULL,
     group_id			INT			PRIMARY KEY,
-    college_name		VARCHAR(30),
+    college_name		VARCHAR(60),
     purpose_statement	TEXT,
     CONSTRAINT college_name_groups_fk
 		FOREIGN KEY (college_name)
@@ -77,6 +78,21 @@ CREATE TABLE group_admin
 	ON DELETE CASCADE ON UPDATE CASCADE
 );    
 
+CREATE TABLE ban_list
+(
+	student_id        VARCHAR(30)     NOT NULL, 
+    group_id 		  INT 			  NOT NULL,
+    PRIMARY KEY (student_id, group_id), 
+    CONSTRAINT group_ban_fk
+		FOREIGN KEY (group_id)
+        REFERENCES groups (group_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT student_ban_fk
+		FOREIGN KEY (student_id)
+        REFERENCES students (student_id)
+        ON DELETE CASCADE ON UPDATE CASCADE 
+);
+
 CREATE TABLE thread
 (
 	thread_id 		INT 			PRIMARY KEY,
@@ -110,9 +126,62 @@ CREATE TABLE thread_comment
         ON DELETE CASCADE ON UPDATE CASCADE 
 );
     
+INSERT INTO UniversityTracker.colleges VALUES 
+("College of Arts, Media and Design"), 
+("D'Amore-McKim School of Business"), 
+("College of Computer and Information Science"), 
+("College of Engineering"), 
+("Bouvé College of Health Sciences"), 
+("School of Law"), 
+("College of Professional Studies"), 
+("College of Science"), 
+("College of Social Sciences and Humanities"), 
+("None");
 
-    
-    
-    
-    
-	
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS get_groups//
+CREATE PROCEDURE get_groups
+(
+	username VARCHAR(30)
+)
+BEGIN
+	SELECT groups.group_name
+	FROM members JOIN groups
+		ON groups.group_id = members.group_id
+	WHERE members.student_id = name
+	ORDER BY groups.group_name;
+END//
+
+DROP PROCEDURE IF EXISTS get_members//
+CREATE PROCEDURE get_members
+(
+	name VARCHAR(30)
+)
+BEGIN
+	SELECT members.student_id
+	FROM members JOIN groups
+		ON groups.group_id = members.group_id
+	WHERE groups.group_name = name
+	ORDER BY members.student_id;
+END//
+
+DROP FUNCTION IF EXISTS verify_user//
+CREATE FUNCTION verify_user
+(
+	user VARCHAR(30),
+    pass VARCHAR(30)
+)
+RETURNS BOOLEAN
+BEGIN
+	DECLARE verified BOOLEAN;
+	IF EXISTS (SELECT students.student_id 
+				FROM students 
+				WHERE student_id = user 
+					AND student_password = pass)
+		THEN SET verified = TRUE;
+	ELSE 
+        SET verified = FALSE;
+	END IF;
+    RETURN(verified);
+END//
