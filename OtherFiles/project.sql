@@ -153,6 +153,32 @@ BEGIN
 	ORDER BY groups.group_name;
 END//
 
+DROP PROCEDURE IF EXISTS get_other_groups//
+CREATE PROCEDURE get_other_groups
+(
+	username VARCHAR(30)
+)
+BEGIN
+	SELECT groups.group_name
+	FROM members JOIN groups
+		ON groups.group_id = members.group_id
+	WHERE NOT members.student_id = name
+	ORDER BY groups.group_name;
+END//
+
+DROP PROCEDURE IF EXISTS get_notes//
+CREATE PROCEDURE get_notes
+(
+	username VARCHAR(30)
+)
+BEGIN
+	SELECT notes.student_to_id, notes.student_from_id, notes.note_text
+	FROM notes
+	WHERE notes.student_to_id = username 
+    OR notes.student_from_id = username
+	ORDER BY notes.note_id;
+END//
+
 DROP PROCEDURE IF EXISTS get_members//
 CREATE PROCEDURE get_members
 (
