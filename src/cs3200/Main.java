@@ -13,11 +13,8 @@ import java.io.InputStreamReader;
 public class Main {
 
     public static void main(String[] args) {
-
-        IController controller = new DatabaseController(System.out, new InputStreamReader(System
-                .in));
-        controller.initialize(new GUIFrame(), new FrontEndModel());
-
+        IController controller = new DatabaseController(new GUIFrame(), new FrontEndModel());
+        controller.run();
     }
 
 }
