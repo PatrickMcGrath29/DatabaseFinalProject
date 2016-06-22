@@ -3,6 +3,9 @@ package cs3200.Controller;
 import cs3200.Model.IModel;
 import cs3200.View.IView;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,19 +13,21 @@ import java.util.Formatter;
 import java.util.Scanner;
 
 /**
- * Created by patrickmcgrath on 6/21/16.
+ * Controller Class for the Database Design Front End program
  */
-public class DatabaseController implements IController {
+public class DatabaseController implements ActionListener {
     private String username, password;
     private Formatter ap;
     private IView view;
     private IModel model;
 
-    public DatabaseController(IView view, IModel model) {
-        this.view = view;
+    public DatabaseController(IModel model) {
         this.model = model;
+    }
+
+    public void setView(IView view) {
+        this.view = view;
         this.view.initialize();
-        this.view.getUserPass();
     }
 
     public void run() {
@@ -81,5 +86,27 @@ public class DatabaseController implements IController {
             e.printStackTrace();
             return;
         }
+    }
+
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Scanner sc = new Scanner(e.getActionCommand());
+
+        switch (sc.nextLine()) {
+            case "LOGIN":
+                username = sc.nextLine();
+                password = sc.nextLine();
+
+        }
+    }
+
+    /**
+     * Checks if the username included in the parameter currently exists in the database.
+     * @param username The username to be checked for existence in the DB
+     * @return True if the username is in the database for a student, false otherwise
+     */
+    private boolean verifyUsername(String username) {
+
     }
 }

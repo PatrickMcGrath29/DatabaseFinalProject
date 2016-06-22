@@ -1,11 +1,8 @@
 package cs3200;
 
 import cs3200.Controller.DatabaseController;
-import cs3200.Controller.IController;
 import cs3200.Model.FrontEndModel;
 import cs3200.View.GUIFrame;
-
-import java.io.InputStreamReader;
 
 /**
  * Main Class for the Database Connector
@@ -13,7 +10,8 @@ import java.io.InputStreamReader;
 public class Main {
 
     public static void main(String[] args) {
-        IController controller = new DatabaseController(new GUIFrame(), new FrontEndModel());
+        DatabaseController controller = new DatabaseController(new FrontEndModel());
+        controller.setView(new GUIFrame(controller));
         controller.run();
     }
 

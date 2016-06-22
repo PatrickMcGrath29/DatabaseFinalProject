@@ -5,17 +5,10 @@ package cs3200.View;
  */
 public interface IView {
 
-
     /**
-     * Initalizes the current view for the user.
+     * Makes the frame visible, also intializing any additional features for the specific frame
      */
     void initialize();
-
-    /**
-     * Initalizes the first view, getting the username and password for the user. If the user
-     * does not have an account already then they will be able to create one.
-     */
-    void getUserPass();
 
 
 }
