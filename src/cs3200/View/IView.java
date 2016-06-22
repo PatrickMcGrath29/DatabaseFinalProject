@@ -11,4 +11,6 @@ public interface IView {
     void initialize();
 
 
+    void setPanel(GUIFrame.PanelType panel);
+
 }

@@ -9,7 +9,7 @@ CREATE TABLE colleges
 
 CREATE TABLE students 
 (
-	student_id         INT            PRIMARY KEY,
+	student_id         VARCHAR(30)    PRIMARY KEY	UNIQUE,
 	first_name 		   VARCHAR(30)    NOT NULL, 
 	last_name 		   VARCHAR(30)    NOT NULL,
 	college_name       VARCHAR(30)    NOT NULL,
@@ -21,8 +21,8 @@ CREATE TABLE students
 
 CREATE TABLE notes
 (
-	student_from_id	INT 		NOT NULL,
-    student_to_id   INT   		NOT NULL,
+	student_from_id	VARCHAR(30) NOT NULL		UNIQUE,
+    student_to_id   VARCHAR(30) NOT NULL		UNIQUE,	
     note_id 		INT			PRIMARY KEY 	UNIQUE,
     note_text		MEDIUMTEXT,
     CONSTRAINT student_from_fk
@@ -50,7 +50,7 @@ CREATE table groups
 CREATE TABLE members
 (
 	group_id 		INT				NOT NULL,
-    student_id		INT     		NOT NULL,
+    student_id		VARCHAR(30)     NOT NULL	UNIQUE,
     PRIMARY KEY (group_id, student_id),
     CONSTRAINT group_id_reference_fk
 		FOREIGN KEY (group_id)
@@ -64,7 +64,7 @@ CREATE TABLE members
     
 CREATE TABLE group_admin
 (
-	student_id        INT             NOT NULL, 
+	student_id        VARCHAR(30)     NOT NULL 		UNIQUE, 
     group_id 		  INT 			  NOT NULL,
     PRIMARY KEY (group_id, student_id),
 	CONSTRAINT student_id_fk
@@ -82,7 +82,7 @@ CREATE TABLE thread
 	thread_id 		INT 			PRIMARY KEY,
 	group_id 		INT				NOT NULL,
     thread_text		MEDIUMTEXT,
-    thread_poster 	INT 			NOT NULL,
+    thread_poster 	VARCHAR(30) 	NOT NULL		UNIQUE,
     CONSTRAINT group_thread_fk
 		FOREIGN KEY (group_id)
         REFERENCES groups (group_id)
@@ -98,7 +98,7 @@ CREATE TABLE thread_comment
 	thread_id 		INT				NOT NULL, 
     thread_text 	MEDIUMTEXT, 
     comment_date 	TIMESTAMP 		NOT NULL, 
-    student_id		INT 			NOT NULL,
+    student_id		VARCHAR(30) 	NOT NULL	UNIQUE,
 	PRIMARY KEY (thread_id, student_id, comment_date),
     CONSTRAINT comment_poster_fk
 		FOREIGN KEY (student_id)

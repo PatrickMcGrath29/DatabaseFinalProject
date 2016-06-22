@@ -1,25 +1,29 @@
 package cs3200.Controller;
 
 import cs3200.Model.IModel;
+import cs3200.View.GUIFrame;
 import cs3200.View.IView;
+import cs3200.util.Utils;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.Scanner;
 
 /**
  * Controller Class for the Database Design Front End program
  */
-public class DatabaseController implements ActionListener {
+public class DatabaseController {
     private String username, password;
     private Formatter ap;
     private IView view;
     private IModel model;
+    private Connection conn = null;
+
 
     public DatabaseController(IModel model) {
         this.model = model;
@@ -31,7 +35,6 @@ public class DatabaseController implements ActionListener {
     }
 
     public void run() {
-        Connection conn = null;
         try {
             conn = this.model.getConnection();
             System.out.println("Connected to database");
@@ -42,62 +45,10 @@ public class DatabaseController implements ActionListener {
         }
         try {
             Statement stmt = conn.createStatement();
-            /*// executes query to get character names column
-            ResultSet rs = stmt.executeQuery("SELECT character_name FROM characters");
-            System.out.println("Character name to track: ");
-            character_name = sc.nextLine();
-            boolean invalid = true;
-            // validates your character name
-            while(invalid) {
-                while(rs.next()) {
-                    if(rs.getString(1).equals(character_name)) {
-                        invalid = false;
-                    }
-                }
-                if(invalid) {
-                    // if given an invalid character name, will display the error message below
-                    // and prompt user to try again
-                    rs = stmt.executeQuery("SELECT character_name FROM characters");
-                    System.out.println("Invalid character name, try again: ");
-                    character_name = sc.nextLine();
-                }
-            }
-            // executes track_character on our now valid character name
-            rs = stmt.executeQuery("CALL track_character('"+ character_name + "')");
-            // prints our result set
-            String results = "";
-            while(rs.next()) {
-                for(int i = 1; i <= rs.getMetaData().getColumnCount() ; i++) {
-                    results += rs.getMetaData().getColumnName(i) + ": " + rs.getString(i);
-                    if (i < rs.getMetaData().getColumnCount()) {
-                        results += ", ";
-                    }
-                }
-                results += "\n";
-            }
-            results = results.substring(0,results.length() - 1);
-            System.out.println(results);
-            // closes our connection and ends the program.
-            */
-            stmt.close();
-            conn.close();
         } catch (SQLException e) {
             System.out.println("ERROR: Encountered exception");
             e.printStackTrace();
             return;
-        }
-    }
-
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        Scanner sc = new Scanner(e.getActionCommand());
-
-        switch (sc.nextLine()) {
-            case "LOGIN":
-                username = sc.nextLine();
-                password = sc.nextLine();
-
         }
     }
 
@@ -106,7 +57,19 @@ public class DatabaseController implements ActionListener {
      * @param username The username to be checked for existence in the DB
      * @return True if the username is in the database for a student, false otherwise
      */
-    private boolean verifyUsername(String username) {
+    public boolean verifyUsername(String username) {
+        String sqlUsername = "SELECT student_id FROM students";
+        ArrayList<String> usernames = new ArrayList<>();
+        try {
+            Statement getUsernames = conn.prepareStatement(sqlUsername);
+            ResultSet studentIds = getUsernames.executeQuery(sqlUsername);
 
+            while (studentIds.next()) {
+                usernames.add(studentIds.getString("student_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return usernames.contains(username);
     }
 }
