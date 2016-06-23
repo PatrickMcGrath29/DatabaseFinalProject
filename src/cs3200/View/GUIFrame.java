@@ -223,8 +223,8 @@ public class GUIFrame extends JFrame implements IView{
             String sqlInsert = "INSERT INTO groups (group_name, college_name, purpose_statement)"
                     + "VALUES (?, ?, ?)";
 
-            String sqlGetID = "SELECT g.group_id FROM groups g WHERE g.group_name = ? " +
-                    "AND g.purpose_statement = ?";
+            String sqlGetID = "SELECT group_id FROM groups WHERE group_name = ? " +
+                    "AND purpose_statement = ?";
 
             String sqlMember = "INSERT INTO members (group_id, student_id) VALUES (?, ?)";
             int groupID = -1;
@@ -234,8 +234,6 @@ public class GUIFrame extends JFrame implements IView{
                 prep1.setString(2, colleges.getSelectedItem().toString());
                 prep1.setString(3, purposeStatement.getText());
                 prep1.execute();
-                groupName.setText("");
-                purposeStatement.setText("");
 
                 PreparedStatement prep3 = controller.conn.prepareStatement(sqlGetID);
                 prep3.setString(1, groupName.getText());
@@ -310,11 +308,10 @@ public class GUIFrame extends JFrame implements IView{
 
         return panel;
     }
-
-
-
+    
     private JPanel myGroupsPage() {
         JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
         JButton mainPage = new JButton("Home");
 
         JButton goToGroup = new JButton("Continue");
@@ -340,6 +337,16 @@ public class GUIFrame extends JFrame implements IView{
         this.add(enterLabel);
         this.add(enterGroup);
         this.add(goToGroup);
+
+        panel.add(groups);
+        panel.add(enterLabel);
+        panel.add(enterGroup);
+        panel.add(goToGroup);
+        panel.add(mainPage);
+
+        mainPage.addActionListener((ActionEvent e) -> {
+            this.setPanel(PanelType.mainPage);
+        });
 
         goToGroup.addActionListener((ActionEvent e) -> {
             this.currentGroupID = enterGroup.getText();

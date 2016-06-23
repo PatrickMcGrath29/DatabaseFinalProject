@@ -3,7 +3,6 @@ package cs3200.Controller;
 import cs3200.Model.IModel;
 import cs3200.View.GUIFrame;
 import cs3200.View.IView;
-import cs3200.util.Utils;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
