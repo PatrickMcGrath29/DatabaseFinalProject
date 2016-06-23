@@ -308,7 +308,7 @@ public class GUIFrame extends JFrame implements IView{
 
         return panel;
     }
-    
+
     private JPanel myGroupsPage() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(0, 1));
