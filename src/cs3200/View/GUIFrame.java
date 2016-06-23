@@ -21,10 +21,11 @@ public class GUIFrame extends JFrame implements IView{
     private String guiUser, guiPass;
     private DatabaseController controller;
     JPanel current;
+    private String currentGroupID = "";
 
     public enum PanelType {
         firstPanel, newUser, mainPage, listGroups, myGroups, createGroup, myNotes,
-        sendNote
+        sendNote, individualGroup
     }
 
 
@@ -143,6 +144,8 @@ public class GUIFrame extends JFrame implements IView{
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
+                this.guiUser = userText.getText();
+                this.guiPass = passText.getText();
                 this.setPanel(PanelType.mainPage);
             }
         });
@@ -219,6 +222,12 @@ public class GUIFrame extends JFrame implements IView{
         createGroup.addActionListener((ActionEvent e) -> {
             String sqlInsert = "INSERT INTO groups (group_name, college_name, purpose_statement)"
                     + "VALUES (?, ?, ?)";
+
+            String sqlGetID = "SELECT g.group_id FROM groups g WHERE g.group_name = ? " +
+                    "AND g.purpose_statement = ?";
+
+            String sqlMember = "INSERT INTO members (group_id, student_id) VALUES (?, ?)";
+            int groupID = -1;
             try {
                 PreparedStatement prep1 = controller.conn.prepareStatement(sqlInsert);
                 prep1.setString(1, groupName.getText());
@@ -227,6 +236,19 @@ public class GUIFrame extends JFrame implements IView{
                 prep1.execute();
                 groupName.setText("");
                 purposeStatement.setText("");
+
+                PreparedStatement prep3 = controller.conn.prepareStatement(sqlGetID);
+                prep3.setString(1, groupName.getText());
+                prep3.setString(2, purposeStatement.getText());
+                ResultSet groupIdFind = prep3.executeQuery();
+                while (groupIdFind.next()) {
+                    groupID = groupIdFind.getInt(1);
+                }
+
+                PreparedStatement prep2 = controller.conn.prepareCall(sqlMember);
+                prep2.setInt(1, groupID);
+                prep2.setString(2, this.guiUser);
+                prep2.execute();
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
@@ -241,14 +263,88 @@ public class GUIFrame extends JFrame implements IView{
 
     private JPanel listGroupsPage() {
         JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
         JButton mainPage = new JButton("Home");
+        JLabel groups = new JLabel();
+        JTextField joinGroup = new JTextField(15);
+        JLabel joinLabel = new JLabel("To join, enter group ID");
+        JButton join = new JButton("Join");
+        String labelText = "";
+
+        String sqlGroups = "CALL get_other_groups(?)";
+        try {
+            PreparedStatement prep = controller.conn.prepareStatement(sqlGroups);
+            prep.setString(1, this.guiUser);
+            ResultSet result = prep.executeQuery();
+            while (result.next()) {
+                labelText += "Name: " + result.getString(1) + "   ID: " + result.getString(2) +
+                        "\n";
+            }
+            groups.setText(labelText);
+            System.out.println(labelText);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        panel.add(groups);
+        panel.add(joinLabel);
+        panel.add(joinGroup);
+        panel.add(join);
+        panel.add(mainPage);
+
+        mainPage.addActionListener((ActionEvent e) -> {
+            this.setPanel(PanelType.mainPage);
+        });
+
+        //Adds the user to the group
+        join.addActionListener((ActionEvent e) -> {
+            String sqlStatement = "INSERT INTO members (group_id, student_id) values (?, ?)";
+            try {
+                PreparedStatement prep = controller.conn.prepareStatement(sqlStatement);
+                prep.setString(1, joinGroup.getText());
+                prep.setString(2, this.guiUser);
+                prep.execute();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        });
 
         return panel;
     }
 
+
+
     private JPanel myGroupsPage() {
         JPanel panel = new JPanel();
         JButton mainPage = new JButton("Home");
+
+        JButton goToGroup = new JButton("Continue");
+        JLabel groups = new JLabel();
+        JLabel enterLabel = new JLabel("Enter the Group ID to go to group view");
+        JTextField enterGroup = new JTextField(15);
+        String labelText = "";
+        String sqlGroups = "CALL get_groups(?)";
+        try {
+            PreparedStatement prep = controller.conn.prepareStatement(sqlGroups);
+            prep.setString(1, this.guiUser);
+            ResultSet rs = prep.executeQuery();
+            while (rs.next()) {
+                labelText += "Name: " + rs.getString(1) + "    ID: " + rs.getString(2) +
+                        "\n";
+            }
+            groups.setText(labelText);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        this.add(groups);
+        this.add(enterLabel);
+        this.add(enterGroup);
+        this.add(goToGroup);
+
+        goToGroup.addActionListener((ActionEvent e) -> {
+            this.currentGroupID = enterGroup.getText();
+            this.setPanel(PanelType.individualGroup);
+        });
 
         return panel;
 
@@ -263,6 +359,13 @@ public class GUIFrame extends JFrame implements IView{
     }
 
     private JPanel sendNotesPage() {
+        JPanel panel = new JPanel();
+        JButton mainPage = new JButton("Home");
+
+        return panel;
+    }
+
+    private JPanel individualGroup() {
         JPanel panel = new JPanel();
         JButton mainPage = new JButton("Home");
 
@@ -313,7 +416,6 @@ public class GUIFrame extends JFrame implements IView{
                 this.current = createGroupPage();
                 this.add(current);
                 this.refresh();
-
                 break;
             case listGroups:
                 this.remove(current);
@@ -339,6 +441,11 @@ public class GUIFrame extends JFrame implements IView{
                 this.add(current);
                 this.refresh();
                 break;
+            case individualGroup:
+                this.remove(current);
+                this.current = individualGroup();
+                this.add(current);
+                this.refresh();
         }
     }
 
