@@ -2,6 +2,7 @@ package cs3200.View;
 
 import cs3200.Controller.DatabaseController;
 
+import javax.management.StandardEmitterMBean;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -22,12 +23,6 @@ public class GUIFrame extends JFrame implements IView{
     private DatabaseController controller;
     JPanel current;
     private String currentGroupID = "";
-
-    public enum PanelType {
-        firstPanel, newUser, mainPage, listGroups, myGroups, createGroup, myNotes,
-        sendNote, individualGroup
-    }
-
 
     public GUIFrame(DatabaseController controller) {
         this.controller = controller;
@@ -84,14 +79,16 @@ public class GUIFrame extends JFrame implements IView{
                 e1.printStackTrace();
             }
             if (isVerified == 1) {
-                this.setPanel(PanelType.mainPage);
+                this.setPanel(getMainPage());
             } else {
-                JOptionPane.showMessageDialog(this, "Unknown Username.");
+                JOptionPane.showMessageDialog(this, "Unknown " +
+                        "Username/Password Combo" +
+                        ".");
             }
         });
 
         newUser.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.newUser);
+            this.setPanel(getUserData());
         });
 
         this.pack();
@@ -111,8 +108,6 @@ public class GUIFrame extends JFrame implements IView{
         JTextField firstText = new JTextField(15);
         JTextField lastText = new JTextField(15);
         JButton makeAccount = new JButton("Make Account");
-
-
         JComboBox collegeBox = new JComboBox(this.getColleges().toArray());
         panel.add(new JLabel("Username:"));
         panel.add(userText);
@@ -129,6 +124,8 @@ public class GUIFrame extends JFrame implements IView{
         makeAccount.addActionListener((ActionEvent e) -> {
             if (controller.verifyUsername(userText.getText())) {
                 JOptionPane.showMessageDialog(this, "Username already used.");
+            } else if (userText.getText().equals("")){
+                JOptionPane.showMessageDialog(this, "Please enter username.");
             } else {
                 String newS = "INSERT INTO students (student_id, student_password, first_name, last_name," +
                         " college_name)" + " values (?, ?, ?, ?, ?)";
@@ -146,10 +143,9 @@ public class GUIFrame extends JFrame implements IView{
                 }
                 this.guiUser = userText.getText();
                 this.guiPass = passText.getText();
-                this.setPanel(PanelType.mainPage);
+                this.setPanel(getMainPage());
             }
         });
-
         return panel;
     }
 
@@ -162,37 +158,45 @@ public class GUIFrame extends JFrame implements IView{
         JButton myGroups = new JButton("My Groups");
         JButton myNotes = new JButton("My Notes");
         JButton sendNote = new JButton("Send a Note");
+        JButton logout = new JButton("Logout");
 
         panel.add(createGroup);
         panel.add(listGroups);
         panel.add(myGroups);
         panel.add(myNotes);
         panel.add(sendNote);
+        panel.add(logout);
 
         //Create Group Button
         createGroup.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.createGroup);
+            this.setPanel(createGroupPage());
         });
 
         //List All Groups the user is not a part of action listener
         listGroups.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.listGroups);
+            this.setPanel(listGroupsPage());
         });
 
         //List all of my Groups action listener
         myGroups.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.myGroups);
+            this.setPanel(myGroupsPage());
         });
 
         //Lists all of my notes. The notes I have received appear first, then the notes I have
         // sent.
         myNotes.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.myNotes);
+            this.setPanel(myNotesPage());
         });
 
         //Send Note action listener
         sendNote.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.sendNote);
+            this.setPanel(sendNotesPage());
+        });
+
+        logout.addActionListener((ActionEvent e) -> {
+            this.guiUser = "";
+            this.guiPass = "";
+            this.setPanel(this.getUserPass());
         });
 
         return panel;
@@ -227,6 +231,9 @@ public class GUIFrame extends JFrame implements IView{
                     "AND purpose_statement = ?";
 
             String sqlMember = "INSERT INTO members (group_id, student_id) VALUES (?, ?)";
+
+            String sqlAdmin = "INSERT INTO group_admin (group_id, student_id) " +
+                    "VALUES (?, ?)";
             int groupID = -1;
             try {
                 PreparedStatement prep1 = controller.conn.prepareStatement(sqlInsert);
@@ -247,13 +254,21 @@ public class GUIFrame extends JFrame implements IView{
                 prep2.setInt(1, groupID);
                 prep2.setString(2, this.guiUser);
                 prep2.execute();
+
+                PreparedStatement prep4 = controller.conn.prepareCall
+                        (sqlAdmin);
+                prep4.setInt(1, groupID);
+                prep4.setString(2, this.guiUser);
+                prep4.execute();
+                this.currentGroupID = groupID + "";
+                this.setPanel(this.individualGroup());
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
         });
 
         mainPage.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.mainPage);
+            this.setPanel(getMainPage());
         });
 
         return panel;
@@ -263,44 +278,77 @@ public class GUIFrame extends JFrame implements IView{
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(0, 1));
         JButton mainPage = new JButton("Home");
-        JLabel groups = new JLabel();
-        JTextField joinGroup = new JTextField(15);
-        JLabel joinLabel = new JLabel("To join, enter group ID");
+        JLabel joinLabel = new JLabel("To join, enter group number");
         JButton join = new JButton("Join");
-        String labelText = "";
-
-        String sqlGroups = "CALL get_other_groups(?)";
+        ArrayList<String> groups = new ArrayList<String>();
+        ArrayList<String> resultGroups = new ArrayList<String>();
+        String sqlGroups = "SELECT * FROM groups";
         try {
             PreparedStatement prep = controller.conn.prepareStatement(sqlGroups);
-            prep.setString(1, this.guiUser);
             ResultSet result = prep.executeQuery();
-            while (result.next()) {
-                labelText += "Name: " + result.getString(1) + "   ID: " + result.getString(2) +
-                        "\n";
+            while(result.next()) {
+                groups.add(result.getString(2));
             }
-            groups.setText(labelText);
-            System.out.println(labelText);
+            for (int i = 0; i < groups.size(); i++) {
+                String sql2 = "SELECT groups.group_id \n" +
+                        "\tFROM members JOIN groups \n" +
+                        "    ON groups.group_id = members.group_id \n" +
+                        "    WHERE members.student_id = '" +
+                        guiUser + "'";
+                Statement stmt = controller.conn.createStatement();
+                result = stmt.executeQuery(sql2);
+                if(result.next() && result.getString(1).equals(groups.get(i))) {
+                    groups.remove(i);
+                }
+                stmt.close();
+            }
+            String sql3 = "";
+            for(String s : groups) {
+                sql3 = "SELECT groups.group_name, groups.group_id, " +
+                        "groups.college_name FROM groups WHERE group_id = '"
+                        + s + "'";
+                Statement stmt = controller.conn.createStatement();
+                result = stmt.executeQuery(sql3);
+                while (result.next()) {
+                    String labelText =  result.getString(2) + ": " + result
+                            .getString(1) +
+                            " affiliated with " + result.getString(3);
+                    panel.add(new JLabel(labelText));
+                    resultGroups.add(result.getString(2));
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        panel.add(groups);
+        JComboBox joinGroup = new JComboBox(resultGroups.toArray());
         panel.add(joinLabel);
         panel.add(joinGroup);
         panel.add(join);
         panel.add(mainPage);
 
         mainPage.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.mainPage);
+            this.setPanel(getMainPage());
         });
 
         //Adds the user to the group
         join.addActionListener((ActionEvent e) -> {
             String sqlStatement = "INSERT INTO members (group_id, student_id) values (?, ?)";
             try {
-                PreparedStatement prep = controller.conn.prepareStatement(sqlStatement);
-                prep.setString(1, joinGroup.getText());
-                prep.setString(2, this.guiUser);
-                prep.execute();
+                String sql2 = "SELECT user_is_banned(?, ?)";
+                PreparedStatement prep2 = controller.conn.prepareStatement
+                        (sql2);
+                prep2.setString(1, this.guiUser);
+                prep2.setString(2, joinGroup.getSelectedItem().toString());
+                ResultSet rs = prep2.executeQuery();
+                rs.next();
+                if(!rs.getBoolean(1)) {
+                    PreparedStatement prep = controller.conn.prepareStatement(sqlStatement);
+                    this.currentGroupID = joinGroup.getSelectedItem().toString();
+                    prep.setString(1, currentGroupID);
+                    prep.setString(2, this.guiUser);
+                    prep.execute();
+                    this.setPanel(this.individualGroup());
+                }
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
@@ -315,42 +363,37 @@ public class GUIFrame extends JFrame implements IView{
         JButton mainPage = new JButton("Home");
 
         JButton goToGroup = new JButton("Continue");
-        JLabel groups = new JLabel();
-        JLabel enterLabel = new JLabel("Enter the Group ID to go to group view");
-        JTextField enterGroup = new JTextField(15);
-        String labelText = "";
+        JLabel enterLabel = new JLabel("Enter group number to go to group " +
+                "view");
         String sqlGroups = "CALL get_groups(?)";
+        ArrayList<String> groups = new ArrayList<String>();
         try {
             PreparedStatement prep = controller.conn.prepareStatement(sqlGroups);
             prep.setString(1, this.guiUser);
-            ResultSet rs = prep.executeQuery();
-            while (rs.next()) {
-                labelText += "Name: " + rs.getString(1) + "    ID: " + rs.getString(2) +
-                        "\n";
+            ResultSet result = prep.executeQuery();
+            while (result.next()) {
+                String labelText =  result.getString(2) + ": " + result
+                        .getString(1) +
+                        " affiliated with " + result.getString(3);
+                panel.add(new JLabel(labelText));
+                groups.add(result.getString(2));
             }
-            groups.setText(labelText);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        this.add(groups);
-        this.add(enterLabel);
-        this.add(enterGroup);
-        this.add(goToGroup);
-
-        panel.add(groups);
+        JComboBox enterGroup = new JComboBox(groups.toArray());
         panel.add(enterLabel);
         panel.add(enterGroup);
         panel.add(goToGroup);
         panel.add(mainPage);
 
         mainPage.addActionListener((ActionEvent e) -> {
-            this.setPanel(PanelType.mainPage);
+            this.setPanel(getMainPage());
         });
 
         goToGroup.addActionListener((ActionEvent e) -> {
-            this.currentGroupID = enterGroup.getText();
-            this.setPanel(PanelType.individualGroup);
+            this.currentGroupID = enterGroup.getSelectedItem().toString();
+            this.setPanel(individualGroup());
         });
 
         return panel;
@@ -359,23 +402,263 @@ public class GUIFrame extends JFrame implements IView{
 
     private JPanel myNotesPage() {
         JPanel panel = new JPanel();
-        JButton mainPage = new JButton("Home");
+        panel.setLayout(new GridLayout(0, 1));
+        try {
+            JLabel sent = new JLabel("Sent: ");
+            JComboBox sents;
+            JButton view = new JButton("View Message");
+            JLabel received = new JLabel("Received: ");
+            JComboBox from;
+            JButton view2 = new JButton("View Message");
+            JButton mainPage = new JButton("Home");
+            String sql1 = "SELECT student_to_id, note_id FROM notes WHERE " +
+                    "student_from_id = '" + this.guiUser + "' ORDER BY note_id";
+            String sql2 = "SELECT student_from_id, note_id FROM notes WHERE " +
+                    "student_to_id = '" + this.guiUser + "' ORDER BY note_id";
+            Statement stmt1 = controller.conn.createStatement();
+            Statement stmt2 = controller.conn.createStatement();
+            ResultSet rs1 = stmt1.executeQuery(sql1);
+            ResultSet rs2 = stmt2.executeQuery(sql2);
+            ArrayList<String> names1 = new ArrayList<String>();
+            ArrayList<String> names2 = new ArrayList<String>();
+            while(rs1.next()) {
+                names1.add("ID: " + rs1.getString(2) + " To: " + rs1.getString
+                        (1));
+            }
+            while(rs2.next()) {
+                names2.add("ID: " + rs2.getString(2) + " To: " + rs2.getString(1));
+            }
+            sents = new JComboBox(names1.toArray());
+            from = new JComboBox(names2.toArray());
+            panel.add(sent);
+            panel.add(sents);
+            panel.add(view);
+            panel.add(received);
+            panel.add(from);
+            panel.add(view2);
+            panel.add(mainPage);
+
+            view.addActionListener((ActionEvent e) -> {
+                this.setPanel(getNotePage(sents.getSelectedItem().toString()
+                        .substring(4)));
+            });
+
+            view2.addActionListener((ActionEvent e) -> {
+                this.setPanel(getNotePage(from.getSelectedItem().toString().substring(4)));
+            });
+
+            mainPage.addActionListener((ActionEvent e) -> {
+                this.setPanel(getMainPage());
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         return panel;
 
     }
 
+    private JPanel getNotePage(String id) {
+        String realID = "";
+        for(char c : id.toCharArray()) {
+            if (c == ' ') {
+                break;
+            } else {
+                realID += c;
+            }
+        }
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
+        JButton mainPage = new JButton("Home");
+        JLabel noteID = new JLabel("ID: " + realID);
+        JLabel to;
+        JLabel from;
+        JLabel body;
+        try {
+            String sql1 = "SELECT student_to_id, student_from_id, note_text " +
+                    "FROM notes WHERE note_id = ?";
+            PreparedStatement prep1 = controller.conn.prepareStatement(sql1);
+            prep1.setString(1, id);
+            ResultSet rs1 = prep1.executeQuery();
+            rs1.next();
+            to = new JLabel("To: " + rs1.getString(1));
+            from = new JLabel("From: " + rs1.getString(2));
+            body = new JLabel("Message: " + rs1.getString(3));
+
+            panel.add(noteID);
+            panel.add(to);
+            panel.add(from);
+            panel.add(body);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        panel.add(mainPage);
+
+        mainPage.addActionListener((ActionEvent e) -> {
+            this.setPanel(getMainPage());
+        });
+        return panel;
+    }
+
     private JPanel sendNotesPage() {
         JPanel panel = new JPanel();
-        JButton mainPage = new JButton("Home");
+        panel.setLayout(new GridLayout(0, 1));
+        try {
+            JLabel recip = new JLabel("Recipient: ");
+            JComboBox to;
+            JLabel body = new JLabel("Message: ");
+            JTextField message = new JTextField(15);
+            JButton send = new JButton("Send Message");
+            JButton mainPage = new JButton("Home");
+            String sql = "SELECT student_id FROM students WHERE NOT " +
+                    "student_id = '" + this.guiUser + "'";
+            Statement stmt = controller.conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            ArrayList<String> names = new ArrayList<String>();
+            while(rs.next()) {
+                names.add(rs.getString(1).toString());
+            }
+            to = new JComboBox(names.toArray());
+            panel.add(recip);
+            panel.add(to);
+            panel.add(body);
+            panel.add(message);
+            panel.add(send);
+            panel.add(mainPage);
 
+            send.addActionListener((ActionEvent e) -> {
+                String sqlStatement = "INSERT INTO notes (student_from_id, " +
+                        "student_to_id, note_text) values (?, ?, ?)";
+                try {
+                    PreparedStatement prep = controller.conn.prepareStatement(sqlStatement);
+                    prep.setString(1, this.guiUser);
+                    prep.setString(2, to.getSelectedItem().toString());
+                    prep.setString(3, message.getText());
+                    prep.execute();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                this.setPanel(getMainPage());
+            });
+
+            mainPage.addActionListener((ActionEvent e) -> {
+                this.setPanel(getMainPage());
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return panel;
     }
 
     private JPanel individualGroup() {
         JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
         JButton mainPage = new JButton("Home");
+        JLabel groupName = new JLabel("");
+        JLabel groupID = new JLabel("ID: " + this.currentGroupID);
+        JLabel groupStatement = new JLabel("");
+        JLabel members = new JLabel("Members: ");
+        ArrayList<String> kickable = new ArrayList<>();
+        JLabel admins = new JLabel("Admins: ");
+        boolean admin = false;
+        try {
+            String sql1 = "SELECT group_name FROM groups WHERE group_id = ?";
+            PreparedStatement prep1 = controller.conn.prepareStatement(sql1);
+            prep1.setString(1, this.currentGroupID);
+            ResultSet rs1 = prep1.executeQuery();
+            rs1.next();
+            groupName = new JLabel("Name: " + rs1.getString(1));
 
+            String sql2 = "SELECT purpose_statement FROM groups WHERE " +
+                    "group_id = ?";
+            PreparedStatement prep2 = controller.conn.prepareStatement(sql2);
+            prep2.setString(1, this.currentGroupID);
+            ResultSet rs2 = prep2.executeQuery();
+            rs2.next();
+            groupStatement = new JLabel("Purpose Statement: " + rs2.getString
+                    (1));
+
+            panel.add(groupName);
+            panel.add(groupID);
+            panel.add(groupStatement);
+            String sql3 = "CALL get_members(" + this.currentGroupID + ")";
+            PreparedStatement prep3 = controller.conn.prepareStatement(sql3);
+            ResultSet rs3 = prep3.executeQuery();
+            while(rs3.next()) {
+                String s = rs3.getString(1);
+                kickable.add(s);
+            }
+            panel.add(admins);
+            String sql4 = "CALL get_admins(" + this.currentGroupID + ")";
+            PreparedStatement prep4 = controller.conn.prepareStatement(sql4);
+            ResultSet rs4 = prep4.executeQuery();
+            while(rs4.next()) {
+                String s = rs4.getString(1);
+                if (s.equals(guiUser)) {
+                    admin = true;
+                }
+                for (int i = 0; i < kickable.size(); i++) {
+                    if(kickable.get(i).equals(s)) {
+                        kickable.remove(i);
+                        i--;
+                    }
+                }
+                panel.add(new JLabel(s));
+            }
+            panel.add(members);
+            for(String s : kickable) {
+                panel.add(new JLabel(s));
+            }
+            if (admin) {
+                JComboBox kicks = new JComboBox(kickable.toArray());
+                JButton kick = new JButton("Kick member");
+                JButton delete = new JButton("Close Group");
+                panel.add(kicks);
+                panel.add(kick);
+                panel.add(delete);
+
+                kick.addActionListener((ActionEvent e) -> {
+                    String sql5 = "DELETE FROM members WHERE group_id = ? AND" +
+                            " " +
+                            "student_id = ?;";
+                    String sql6 = "INSERT INTO ban_list VALUES (?, ?)";
+                    try {
+                        PreparedStatement prep = controller.conn
+                                    .prepareStatement(sql5);
+                        prep.setString(1, this.currentGroupID);
+                        prep.setString(2, kicks.getSelectedItem().toString());
+                        prep.execute();
+                        prep = controller.conn.prepareStatement(sql6);
+                        prep.setString(2, this.currentGroupID);
+                        prep.setString(1, kicks.getSelectedItem().toString());
+                        prep.execute();
+                        this.setPanel(individualGroup());
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                });
+
+                delete.addActionListener((ActionEvent e) -> {
+                    String sql7 = "DELETE FROM groups WHERE group_id = ?";
+                    try {
+                        PreparedStatement prep = controller.conn
+                                .prepareStatement(sql7);
+                        prep.setString(1, this.currentGroupID);
+                        prep.execute();
+                        this.setPanel(getMainPage());
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        panel.add(mainPage);
+
+        mainPage.addActionListener((ActionEvent e) -> {
+            this.setPanel(getMainPage());
+        });
         return panel;
     }
 
@@ -396,69 +679,21 @@ public class GUIFrame extends JFrame implements IView{
     }
 
     @Override
-    public void setPanel(PanelType panel) {
-        switch (panel) {
-            case firstPanel:
-                this.remove(current);
-                this.current = getUserPass();
-                this.add(current);
-                this.refresh();
-                break;
-            case newUser:
-                this.remove(current);
-                this.current = getUserData();
-                this.add(current);
-                this.refresh();
-
-                break;
-            case mainPage:
-                this.remove(current);
-                this.current = getMainPage();
-                this.add(current);
-                this.refresh();
-
-                break;
-            case createGroup:
-                this.remove(current);
-                this.current = createGroupPage();
-                this.add(current);
-                this.refresh();
-                break;
-            case listGroups:
-                this.remove(current);
-                this.current = listGroupsPage();
-                this.add(current);
-                this.refresh();
-                break;
-            case myGroups:
-                this.remove(current);
-                this.current = myGroupsPage();
-                this.add(current);
-                this.refresh();
-                break;
-            case myNotes:
-                this.remove(current);
-                this.current = myNotesPage();
-                this.add(current);
-                this.refresh();
-                break;
-            case sendNote:
-                this.remove(current);
-                this.current = sendNotesPage();
-                this.add(current);
-                this.refresh();
-                break;
-            case individualGroup:
-                this.remove(current);
-                this.current = individualGroup();
-                this.add(current);
-                this.refresh();
-        }
+    public void setPanel(JPanel panel) {
+        this.remove(current);
+        this.current = panel;
+        this.add(current);
+        this.refresh();
     }
 
     private void refresh() {
         this.revalidate();
         this.repaint();
         this.pack();
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(800, 400);
     }
 }

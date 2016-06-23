@@ -1,5 +1,7 @@
 package cs3200.View;
 
+import javax.swing.*;
+
 /**
  * Interface for the View of this Database Connector
  */
@@ -11,6 +13,6 @@ public interface IView {
     void initialize();
 
 
-    void setPanel(GUIFrame.PanelType panel);
+    void setPanel(JPanel panel);
 
 }
