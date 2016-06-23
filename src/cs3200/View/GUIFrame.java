@@ -23,12 +23,14 @@ public class GUIFrame extends JFrame implements IView{
     private DatabaseController controller;
     JPanel current;
     private String currentGroupID = "";
+    private String currentThreadID = "";
 
     public GUIFrame(DatabaseController controller) {
         this.controller = controller;
         this.setSize(400, 400);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new FlowLayout());
+        this.setTitle("University Forums - Designed by Patrick McGrath and Alex Zilberscher");
         this.current = this.getUserPass();
         this.add(current);
         this.pack();
@@ -167,6 +169,7 @@ public class GUIFrame extends JFrame implements IView{
         panel.add(sendNote);
         panel.add(logout);
 
+
         //Create Group Button
         createGroup.addActionListener((ActionEvent e) -> {
             this.setPanel(createGroupPage());
@@ -198,6 +201,131 @@ public class GUIFrame extends JFrame implements IView{
             this.guiPass = "";
             this.setPanel(this.getUserPass());
         });
+
+        return panel;
+    }
+
+    private JPanel threadsListPage() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
+        JButton viewThread = new JButton("View Thread");
+        JButton createThread = new JButton("Create a Thread");
+        JButton back = new JButton("Back");
+        JButton main = new JButton("Home");
+        ArrayList<String> threads = new ArrayList<String>();
+        String sqlThreads = "SELECT * FROM thread WHERE group_id = ?";
+        try {
+            PreparedStatement prep = controller.conn.prepareStatement(sqlThreads);
+            prep.setString(1, this.currentGroupID);
+            ResultSet rs = prep.executeQuery();
+
+            while (rs.next()) {
+                threads.add("Thread ID: " + rs.getString(1) + ", Poster: " + rs.getString(4));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JComboBox threadsInGroup = new JComboBox(threads.toArray());
+        panel.add(new JLabel("Threads currently in this group."));
+        panel.add(threadsInGroup);
+        panel.add(viewThread);
+        panel.add(createThread);
+        panel.add(back);
+        panel.add(main);
+
+
+        back.addActionListener((ActionEvent e) -> {
+            this.setPanel(individualGroup());
+        });
+        main.addActionListener((ActionEvent e) -> {
+            this.setPanel(getMainPage());
+        });
+
+        viewThread.addActionListener((ActionEvent e) -> {
+            this.currentThreadID = threadsInGroup.getSelectedItem().toString();
+            this.setPanel(individualThreadPage());
+        });
+
+        createThread.addActionListener((ActionEvent e) -> {
+            this.setPanel(createThreadPage());
+        });
+
+        return panel;
+    }
+
+    private JPanel individualThreadPage() {
+        JPanel panel = new JPanel();
+        JButton back = new JButton("Back");
+        panel.setLayout(new GridLayout(0, 1));
+        JLabel currentThread = new JLabel("Current Thread: " + this.currentThreadID);
+        JButton main = new JButton("Home");
+        JLabel threadText = new JLabel();
+
+        String sqlGetText = "SELECT thread_text FROM thread WHERE thread_id = ?";
+        try {
+            PreparedStatement prep = controller.conn.prepareStatement(sqlGetText);
+            prep.setString(1, this.currentThreadID);
+            ResultSet rs = prep.executeQuery();
+            while (rs.next()) {
+                threadText.setText(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        panel.add(currentThread);
+        panel.add(new JLabel("Thread Text:"));
+        panel.add(threadText);
+        panel.add(back);
+        panel.add(main);
+
+        back.addActionListener((ActionEvent e) -> {
+            this.setPanel(threadsListPage());
+        });
+        main.addActionListener((ActionEvent e) -> {
+            this.setPanel(getMainPage());
+        });
+
+        return panel;
+    }
+
+    private JPanel createThreadPage() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
+        JLabel threadLabel = new JLabel("Enter the Thread Text below, and click Create");
+        JTextField threadText = new JTextField(50);
+        JButton create = new JButton("Create");
+
+        panel.add(threadLabel);
+        panel.add(threadText);
+        panel.add(create);
+
+        create.addActionListener((ActionEvent e) -> {
+
+            String sqlInsert = "INSERT INTO thread (group_id, thread_text, thread_poster) VALUES (?, ?, ?)";
+            String sqlGetID = "SELECT thread_id FROM thread WHERE thread_text = ? AND " +
+                    "thread_poster = ?";
+
+            try {
+                PreparedStatement prep = controller.conn.prepareStatement(sqlInsert);
+                prep.setString(1, this.currentGroupID);
+                prep.setString(2, threadText.getText());
+                prep.setString(3, this.guiUser);
+                prep.executeUpdate();
+
+                PreparedStatement prep1 = controller.conn.prepareStatement(sqlGetID);
+                prep1.setString(1, threadText.getText());
+                prep1.setString(2, this.guiUser);
+                ResultSet rs = prep1.executeQuery();
+                while (rs.next()) {
+                    this.currentThreadID = rs.getInt(1) + "";
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+            this.setPanel(individualThreadPage());
+        });
+
 
         return panel;
     }
@@ -361,10 +489,11 @@ public class GUIFrame extends JFrame implements IView{
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(0, 1));
         JButton mainPage = new JButton("Home");
-
         JButton goToGroup = new JButton("Continue");
         JLabel enterLabel = new JLabel("Enter group number to go to group " +
                 "view");
+
+
         String sqlGroups = "CALL get_groups(?)";
         ArrayList<String> groups = new ArrayList<String>();
         try {
@@ -560,6 +689,10 @@ public class GUIFrame extends JFrame implements IView{
         JLabel members = new JLabel("Members: ");
         ArrayList<String> kickable = new ArrayList<>();
         JLabel admins = new JLabel("Admins: ");
+
+        JLabel threadsLabel = new JLabel("Click Threads to view all threads for selected group");
+        JButton threads = new JButton("Threads");
+
         boolean admin = false;
         try {
             String sql1 = "SELECT group_name FROM groups WHERE group_id = ?";
@@ -581,6 +714,13 @@ public class GUIFrame extends JFrame implements IView{
             panel.add(groupName);
             panel.add(groupID);
             panel.add(groupStatement);
+            panel.add(threadsLabel);
+            panel.add(threads);
+
+            threads.addActionListener((ActionEvent e) -> {
+                this.setPanel(threadsListPage());
+            });
+
             String sql3 = "CALL get_members(" + this.currentGroupID + ")";
             PreparedStatement prep3 = controller.conn.prepareStatement(sql3);
             ResultSet rs3 = prep3.executeQuery();
@@ -606,6 +746,8 @@ public class GUIFrame extends JFrame implements IView{
                 panel.add(new JLabel(s));
             }
             panel.add(members);
+
+
             for(String s : kickable) {
                 panel.add(new JLabel(s));
             }
@@ -694,6 +836,6 @@ public class GUIFrame extends JFrame implements IView{
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(800, 400);
+        return new Dimension(800, 450);
     }
 }
