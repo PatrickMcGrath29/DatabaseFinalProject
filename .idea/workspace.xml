@@ -2,15 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f1484dd0-6c05-4553-92ec-858cce6a4dd7" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/cs3200/util/Utils.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/DatabaseFinalProject/cs3200/Controller/DatabaseController.class" afterPath="$PROJECT_DIR$/out/production/DatabaseFinalProject/cs3200/Controller/DatabaseController.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/DatabaseFinalProject/cs3200/View/GUIFrame.class" afterPath="$PROJECT_DIR$/out/production/DatabaseFinalProject/cs3200/View/GUIFrame.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/DatabaseFinalProject/cs3200/View/IView.class" afterPath="$PROJECT_DIR$/out/production/DatabaseFinalProject/cs3200/View/IView.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/cs3200/Controller/DatabaseController.java" afterPath="$PROJECT_DIR$/src/cs3200/Controller/DatabaseController.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/cs3200/View/GUIFrame.java" afterPath="$PROJECT_DIR$/src/cs3200/View/GUIFrame.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/cs3200/View/IView.java" afterPath="$PROJECT_DIR$/src/cs3200/View/IView.java" />
     </list>
     <ignored path="DatabaseFinalProject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -33,16 +27,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="DatabaseController.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DatabaseController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/cs3200/Controller/DatabaseController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-189">
-              <caret line="19" column="31" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
+            <state relative-caret-position="621">
+              <caret line="73" column="5" selection-start-line="73" selection-start-column="5" selection-end-line="73" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#681#682#0" expanded="true" />
-                <element signature="e#715#716#0" expanded="true" />
-                <marker date="1466627344000" expanded="true" signature="1768:1799" placeholder="SELECT stude... students" />
+                <element signature="e#680#681#0" expanded="true" />
+                <element signature="e#714#715#0" expanded="true" />
+                <marker date="1466628471000" expanded="true" signature="1767:1798" placeholder="SELECT stude... students" />
               </folding>
             </state>
           </provider>
@@ -94,35 +88,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GUIFrame.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="GUIFrame.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/cs3200/View/GUIFrame.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="486">
-              <caret line="71" column="11" selection-start-line="71" selection-start-column="11" selection-end-line="71" selection-end-column="11" />
+            <state relative-caret-position="179">
+              <caret line="207" column="56" selection-start-line="207" selection-start-column="56" selection-end-line="207" selection-end-column="56" />
               <folding>
                 <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ActionListener.java" pinned="false" current-in-tab="false">
-        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_91.jdk/Contents/Home/src.zip!/java/awt/event/ActionListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="46" column="7" selection-start-line="46" selection-start-column="7" selection-end-line="46" selection-end-column="7" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/cs3200/Main.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="13" column="53" selection-start-line="13" selection-start-column="53" selection-end-line="13" selection-end-column="53" />
-              <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="method#getMainPage#0;class#GUIFrame#0" expanded="false" />
+                <element signature="e#8961#8969#0" expanded="true" />
+                <element signature="method#setPanel#0;class#GUIFrame#0" expanded="false" />
+                <marker date="1466641660000" expanded="true" signature="2008:2032" placeholder="SELECT verif... students" />
+                <marker date="1466641660000" expanded="true" signature="4284:4304" placeholder="INSERT INTO students... " />
+                <marker date="1466641660000" expanded="true" signature="4284:4305" placeholder="INSERT INTO students... " />
+                <marker date="1466641660000" expanded="true" signature="4284:4401" placeholder="INSERT INTO students... " />
+                <marker date="1466641660000" expanded="true" signature="4284:4429" placeholder="INSERT INTO students... " />
+                <marker date="1466641660000" expanded="true" signature="7480:7544" placeholder="INSERT INTO groups... " />
+                <marker date="1466641660000" expanded="true" signature="7480:7585" placeholder="INSERT INTO groups... " />
+                <marker date="1466641660000" expanded="true" signature="9003:9036" placeholder="SELECT colle... colleges" />
               </folding>
             </state>
           </provider>
@@ -159,8 +142,8 @@
         <option value="$PROJECT_DIR$/src/cs3200/View/IView.java" />
         <option value="$PROJECT_DIR$/src/cs3200/util/util.java" />
         <option value="$PROJECT_DIR$/src/cs3200/util/Utils.java" />
-        <option value="$PROJECT_DIR$/src/cs3200/View/GUIFrame.java" />
         <option value="$PROJECT_DIR$/src/cs3200/Controller/DatabaseController.java" />
+        <option value="$PROJECT_DIR$/src/cs3200/View/GUIFrame.java" />
       </list>
     </option>
   </component>
@@ -791,12 +774,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1466551926364</updated>
-      <workItem from="1466551928398" duration="15276000" />
+      <workItem from="1466551928398" duration="25801000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15276000" />
+    <option name="totallyTimeSpent" value="25801000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="838" extended-state="6" />
@@ -810,7 +793,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32769832" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32769832" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -834,7 +817,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="2" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -903,16 +886,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cs3200/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="13" column="53" selection-start-line="13" selection-start-column="53" selection-end-line="13" selection-end-column="53" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/cs3200/util/Utils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
@@ -931,25 +904,46 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cs3200/View/GUIFrame.java">
+    <entry file="file://$PROJECT_DIR$/src/cs3200/Controller/DatabaseController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="486">
-          <caret line="71" column="11" selection-start-line="71" selection-start-column="11" selection-end-line="71" selection-end-column="11" />
+        <state relative-caret-position="621">
+          <caret line="73" column="5" selection-start-line="73" selection-start-column="5" selection-end-line="73" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#680#681#0" expanded="true" />
+            <element signature="e#714#715#0" expanded="true" />
+            <marker date="1466628471000" expanded="true" signature="1767:1798" placeholder="SELECT stude... students" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cs3200/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="53" selection-start-line="13" selection-start-column="53" selection-end-line="13" selection-end-column="53" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cs3200/Controller/DatabaseController.java">
+    <entry file="file://$PROJECT_DIR$/src/cs3200/View/GUIFrame.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-189">
-          <caret line="19" column="31" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
+        <state relative-caret-position="179">
+          <caret line="207" column="56" selection-start-line="207" selection-start-column="56" selection-end-line="207" selection-end-column="56" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#681#682#0" expanded="true" />
-            <element signature="e#715#716#0" expanded="true" />
-            <marker date="1466627344000" expanded="true" signature="1768:1799" placeholder="SELECT stude... students" />
+            <element signature="method#getMainPage#0;class#GUIFrame#0" expanded="false" />
+            <element signature="e#8961#8969#0" expanded="true" />
+            <element signature="method#setPanel#0;class#GUIFrame#0" expanded="false" />
+            <marker date="1466641660000" expanded="true" signature="2008:2032" placeholder="SELECT verif... students" />
+            <marker date="1466641660000" expanded="true" signature="4284:4304" placeholder="INSERT INTO students... " />
+            <marker date="1466641660000" expanded="true" signature="4284:4305" placeholder="INSERT INTO students... " />
+            <marker date="1466641660000" expanded="true" signature="4284:4401" placeholder="INSERT INTO students... " />
+            <marker date="1466641660000" expanded="true" signature="4284:4429" placeholder="INSERT INTO students... " />
+            <marker date="1466641660000" expanded="true" signature="7480:7544" placeholder="INSERT INTO groups... " />
+            <marker date="1466641660000" expanded="true" signature="7480:7585" placeholder="INSERT INTO groups... " />
+            <marker date="1466641660000" expanded="true" signature="9003:9036" placeholder="SELECT colle... colleges" />
           </folding>
         </state>
       </provider>

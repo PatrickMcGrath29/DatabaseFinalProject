@@ -22,7 +22,7 @@ public class DatabaseController {
     private Formatter ap;
     private IView view;
     private IModel model;
-    private Connection conn = null;
+    public Connection conn = null;
 
 
     public DatabaseController(IModel model) {
